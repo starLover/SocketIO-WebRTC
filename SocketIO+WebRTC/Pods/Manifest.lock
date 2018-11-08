@@ -1,0 +1,24 @@
+PODS:
+  - GoogleWebRTC (1.1.25102)
+  - Socket.IO-Client-Swift (11.0.2):
+    - StarscreamSocketIO (~> 8.0.2)
+  - StarscreamSocketIO (8.0.7)
+
+DEPENDENCIES:
+  - GoogleWebRTC
+  - Socket.IO-Client-Swift (~> 11.0.0)
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - GoogleWebRTC
+    - Socket.IO-Client-Swift
+    - StarscreamSocketIO
+
+SPEC CHECKSUMS:
+  GoogleWebRTC: 5cd390bc24c272fb7ca2b8765e4a7578a770b279
+  Socket.IO-Client-Swift: 17d4daf85d74125c33481d9bc40cbe678f0d631a
+  StarscreamSocketIO: 00b54e4208481ca5cef089545353aaf126bae16d
+
+PODFILE CHECKSUM: 55a9dbe2ea670736dace60af2081ce575dd65fa6
+
+COCOAPODS: 1.5.0

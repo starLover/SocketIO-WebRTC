@@ -1,0 +1,6 @@
+framework module Pods_SocketIO_WebRTC {
+  umbrella header "Pods-SocketIO+WebRTC-umbrella.h"
+
+  export *
+  module * { export * }
+}
