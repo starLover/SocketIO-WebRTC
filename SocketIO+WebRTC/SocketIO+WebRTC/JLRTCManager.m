@@ -10,10 +10,11 @@
 #import "JLRTCHeader.h"
 #import "JLRTCManager+Private.h"
 #import "JLSocketIOManager.h"
+#import "JLChatClient.h"
 
 static NSString *const kJLDefaultSTUNServerURL = @"stun:39.105.48.72:3478";
 
-@interface JLRTCManager () <RTCPeerConnectionDelegate, RTCDataChannelDelegate>
+@interface JLRTCManager () <RTCPeerConnectionDelegate, RTCDataChannelDelegate, JLSignalingChannelDelegate>
 
 @property (nonatomic, strong) NSMutableDictionary *peerConnectionDic;
 @property (nonatomic, strong) NSMutableDictionary *dataChannelDic;
@@ -22,14 +23,15 @@ static NSString *const kJLDefaultSTUNServerURL = @"stun:39.105.48.72:3478";
 
 @implementation JLRTCManager
 
-//@synthesize channel = _channel;
+@synthesize channel = _channel;
 @synthesize factory = _factory;
 @synthesize messageQueue = _messageQueue;
 @synthesize hasReceivedSdp = _hasReceivedSdp;
 @synthesize clientId = _clientId;
-@synthesize isInitiator = _isInitiator;
 @synthesize iceServers = _iceServers;
 @synthesize defaultPeerConnectionConstraints = _defaultPeerConnectionConstraints;
+@synthesize state = _state;
+@synthesize mediaType = _mediaType;
 
 - (instancetype)init{
     self = [super init];
@@ -81,17 +83,15 @@ static NSString *const kJLDefaultSTUNServerURL = @"stun:39.105.48.72:3478";
 
 #pragma mark - Public Methods
 
-- (void)chatWithUserId:(NSString *)userId chatType:(JLMediaChannelType)type{
+- (void)chatWithUserId:(NSString *)userId chatType:(JLMediaChannelType)type handler:(JLRoomHanlder)handler{
     NSParameterAssert(userId.length);
-    //    if ([JLSocketIOManager sharedManager].state != JLSignalingChannelStateConnected) {
-    //        return;
-    //    }
+    if (self.channel.state != JLSignalingChannelStateConnected) {
+        return;
+    }
     self.mediaType = type;
     self.state = JLRoomStateConnecting;
     self.factory = [[RTCPeerConnectionFactory alloc] init];
-    [self localMediaStream];
-    [JLSocketIOManager sharedManager].signalingDelegate = self;
-    [[JLSocketIOManager sharedManager] createAndJoinRoomWithToId:userId];
+    [self.channel createAndJoinRoomWithToId:userId mediaType:type handler:handler];
 }
 
 - (void)changeToChatType:(JLMediaChannelType)type{
@@ -103,7 +103,8 @@ static NSString *const kJLDefaultSTUNServerURL = @"stun:39.105.48.72:3478";
         return;
     }
     JLByeMessage *byeMessage = [[JLByeMessage alloc] init];
-    [[JLSocketIOManager sharedManager] sendMessage:byeMessage];
+    [self.channel sendSignalingMessage:byeMessage];
+
     _clientId = nil;
     [_peerConnectionDic removeAllObjects];
     self.state = JLRoomStateDisconnected;
@@ -179,20 +180,6 @@ static NSString *const kJLDefaultSTUNServerURL = @"stun:39.105.48.72:3478";
             break;
         case JLSignalingChannelStateConnected:
             break;
-        case JLSignalingChannelStateJoinedRoomError:
-        {
-            self.state = JLRoomStateDisconnected;
-        }
-            break;
-        case JLSignalingChannelStateJoiningRoom:
-            
-            break;
-        case JLSignalingChannelStateJoinedRoom:
-        {
-            self.state = JLRoomStateConnected;
-        }
-            break;
-            
         default:
             break;
     }
@@ -249,7 +236,7 @@ didGenerateIceCandidate:(RTCIceCandidate *)candidate{
     dispatch_async(dispatch_get_main_queue(), ^{
         NSString *socketId = [self socketIdForPeerConnection:peerConnection];
         JLICECandidateMessage *message = [[JLICECandidateMessage alloc] initWithCandidate:candidate socketId:socketId];
-        [[JLSocketIOManager sharedManager] sendMessage:message];
+        [self.channel sendSignalingMessage:message];
     });
 }
 
@@ -282,15 +269,11 @@ didReceiveMessageWithBuffer:(RTCDataBuffer *)buffer{
     });
 }
 
-- (RTCConfiguration *)defaultPeerConnectionConfiguration{
-    RTCConfiguration *configuration = [[RTCConfiguration alloc] init];
-    configuration.iceServers = self.iceServers;
-    return configuration;
-}
-
 #pragma mark - Private
 
 - (void)configure{
+    //信令通道
+    _channel = (JLSocketIOManager *)[JLChatClient sharedClient].chatManager;
     //初始化点对点工厂, 初始化ICE穿透服务器数组, 初始化点对点连接数组
     self.iceServers = [NSMutableArray arrayWithObjects:[self defaultSTUNServer], nil];
     self.peerConnectionDic = [NSMutableDictionary new];
@@ -329,7 +312,7 @@ didReceiveMessageWithBuffer:(RTCDataBuffer *)buffer{
             //描述发送给对等端, 提议/应答
             NSString *socketId = [weakSelf socketIdForPeerConnection:weakPC];
             JLSessionDescriptionMessage *message = [[JLSessionDescriptionMessage alloc] initWithDescription:sdp socketId:socketId];
-            [[JLSocketIOManager sharedManager] sendMessage:message];
+            [self.channel sendSignalingMessage:message];
         }
     }];
 }
@@ -382,6 +365,11 @@ didReceiveMessageWithBuffer:(RTCDataBuffer *)buffer{
     }];
 }
 
+- (void)addVideoTracks{
+    [self.peerConnectionDic enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, RTCPeerConnection *pc, BOOL * _Nonnull stop) {
+    }];
+}
+
 - (void)removeVideoTrack{
     [self.peerConnectionDic enumerateKeysAndObjectsUsingBlock:^(id  _Nonnull key, RTCPeerConnection *pc, BOOL * _Nonnull stop) {
         RTCMediaStream *mediaStream = [pc.localStreams lastObject];
@@ -412,6 +400,12 @@ didReceiveMessageWithBuffer:(RTCDataBuffer *)buffer{
 - (RTCPeerConnection *)peerConnection{
     RTCPeerConnection *pc = [self.factory peerConnectionWithConfiguration:[self defaultPeerConnectionConfiguration] constraints:[self defaultPeerConnectionConstraints] delegate:self];
     return pc;
+}
+
+- (RTCConfiguration *)defaultPeerConnectionConfiguration{
+    RTCConfiguration *configuration = [[RTCConfiguration alloc] init];
+    configuration.iceServers = self.iceServers;
+    return configuration;
 }
 
 - (RTCDataChannel *)dataChannel:(RTCPeerConnection *)pc{
@@ -525,7 +519,6 @@ didReceiveMessageWithBuffer:(RTCDataBuffer *)buffer{
     }];
     return socketId;
 }
-
 
 #pragma mark - Defaults
 - (RTCMediaConstraints *)defaultMeidaStreamConstraints{

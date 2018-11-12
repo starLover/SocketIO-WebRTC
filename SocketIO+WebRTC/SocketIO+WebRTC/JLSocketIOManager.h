@@ -8,13 +8,14 @@
 
 #import <Foundation/Foundation.h>
 #import "JLSignalingChannel.h"
+#import "JLChatManager.h"
 
-@interface JLSocketIOManager : NSObject <JLSignalingChannel>
+@interface JLSocketIOManager : NSObject <JLSignalingChannel, JLChatManager>
 
-+ (instancetype)sharedManager;
+//+ (instancetype)sharedManager;
 
 - (void)connect;
 
-- (void)sendMessage:(JLSignalingMessage *)message;
+- (void)disconnect;
 
 @end

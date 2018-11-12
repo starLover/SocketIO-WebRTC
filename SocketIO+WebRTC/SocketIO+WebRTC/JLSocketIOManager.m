@@ -15,6 +15,8 @@
 
 @property (nonatomic, strong) SocketIOClient *socket;
 
+@property (nonatomic, copy) JLRoomHanlder roomHandler;
+
 @end
 
 static NSString *const kSocketIOURL = @"http://192.168.1.204:3000";
@@ -27,15 +29,16 @@ static NSString *const kSocketIOURL = @"http://192.168.1.204:3000";
 @synthesize roomId = _roomId;
 @synthesize clientId = _clientId;
 @synthesize toId = _toId;
+@synthesize mediaType = _mediaType;
 
-+ (instancetype)sharedManager {
-    static JLSocketIOManager *sharedManager = nil;
-    static dispatch_once_t onceToken;
-    dispatch_once(&onceToken, ^{
-        sharedManager = [[JLSocketIOManager alloc] init];
-    });
-    return sharedManager;
-}
+//+ (instancetype)sharedManager {
+//    static JLSocketIOManager *sharedManager = nil;
+//    static dispatch_once_t onceToken;
+//    dispatch_once(&onceToken, ^{
+//        sharedManager = [[JLSocketIOManager alloc] init];
+//    });
+//    return sharedManager;
+//}
 
 - (instancetype)init{
     self = [super init];
@@ -55,64 +58,19 @@ static NSString *const kSocketIOURL = @"http://192.168.1.204:3000";
 }
 
 - (void)connect{
-    [self configureCallBack];
+    [self addHandlers];
     [self.socket connect];
 }
 
-- (void)createAndJoinRoomWithToId:(NSString *)toId{
-    NSParameterAssert(toId.length);
-    _toId = toId;
+- (void)disconnect{
+    [self.socket disconnect];
+}
+
+- (void)addHandlers{
     __weak typeof(self)weakSelf = self;
-    if (_state == JLSignalingChannelStateConnected) {
-        self.state = JLSignalingChannelStateJoiningRoom;
-        [[self.socket emitWithAck:@"videoChat" with:@[@{@"from_user":_clientId, @"to_user":_toId, @"chat_type":@(0)}]] timingOutAfter:10.f callback:^(NSArray * _Nonnull data) {
-            if ([data.firstObject isKindOfClass:[NSString class]] && [data.firstObject isEqualToString:@"NO ACK"]) {
-                weakSelf.state = JLSignalingChannelStateJoinedRoomError;
-            } else {
-                [weakSelf joinRoom:data.firstObject];
-            }
-        }];
-    }
-}
-
-- (void)joinRoom:(NSString *)roomId{
-    _roomId = roomId;
-    [self addSocketHandlers];
-    [self joinRoom];
-}
-
-- (void)joinRoom{
-    __weak typeof(self)weakSelf = self;
-    if (self.state == JLSignalingChannelStateConnected) {
-        [[self.socket emitWithAck:@"__join" with:@[@{@"room": _roomId}]] timingOutAfter:10.f callback:^(NSArray * _Nonnull data) {
-            if ([data.firstObject isKindOfClass:[NSString class]] && [data.firstObject isEqualToString:@"NO ACK"]) {
-                weakSelf.state = JLSignalingChannelStateJoinedRoomError;
-            } else {
-                weakSelf.state = JLSignalingChannelStateJoinedRoom;
-            }
-        }];;
-    }
-}
-
-- (void)sendMessage:(JLSendMessage *)message{
-    NSParameterAssert(_clientId.length);
-    NSParameterAssert(_roomId.length);
-    NSDictionary *dictionary = [message dictionary];
-    [self. socket emit:message.typeString with:@[dictionary]];
-}
-
-- (void)configureCallBack{
-    __weak typeof(self)weakSelf = self;
-    [self.socket connectWithTimeoutAfter:15.f withHandler:^{
-        
-    }];
     
-    [self.socket once:@"connect" callback:^(NSArray * _Nonnull data, SocketAckEmitter * _Nonnull ack) {
+    [self.socket on:@"connect" callback:^(NSArray * _Nonnull data, SocketAckEmitter * _Nonnull ack) {
         
-    }];
-    
-    [self.socket onAny:^(SocketAnyEvent * _Nonnull event) {
-        //                NSLog(@"事件: %@ items: %@", event.event, event.items);
     }];
     
     [self.socket on:@"disconnect" callback:^(NSArray * _Nonnull data, SocketAckEmitter * _Nonnull ack) {
@@ -146,40 +104,115 @@ static NSString *const kSocketIOURL = @"http://192.168.1.204:3000";
                 break;
         }
     }];
-}
-
-- (void)addSocketHandlers{
-    __weak typeof(self)weakSelf = self;
-    [self.socket on:@"cancelVideoChat" callback:^(NSArray * _Nonnull data, SocketAckEmitter * _Nonnull ack) {
-        //        [weakSelf didReceiveMessage:data.firstObject event:@"cancelVideoChat"];
+    
+    [self.socket on:@"chat" callback:^(NSArray * _Nonnull data, SocketAckEmitter * _Nonnull ack) {
+        
     }];
     
+    [self.socket on:@"videoChat" callback:^(NSArray * _Nonnull data, SocketAckEmitter * _Nonnull ack) {
+        
+    }];
+    
+    [self.socket on:@"cancelVideoChat" callback:^(NSArray * _Nonnull data, SocketAckEmitter * _Nonnull ack) {
+        
+    }];
+}
+
+#pragma mark -- Signaling
+#pragma mark - Public
+
+- (void)createAndJoinRoomWithToId:(NSString *)toId mediaType:(JLMediaChannelType)type handler:(JLRoomHanlder)handler{
+    NSParameterAssert(toId.length);
+    _toId = toId;
+    _mediaType = type;
+    self.roomHandler = handler;
+    if (_state == JLSignalingChannelStateConnected) {
+        [self createRoom];
+    }
+}
+
+- (void)joinRoom:(NSString *)roomId handler:(JLRoomHanlder)handler{
+    _roomId = roomId;
+    self.roomHandler = handler;
+    [self addSignalingHandlers];
+    [self joinRoom];
+}
+
+- (void)leaveRoom:(NSString *)roomId{
+    NSParameterAssert(roomId.length);
+    [self.socket emit:@"cancelVideoChat" with:@[roomId]];
+}
+
+- (void)sendSignalingMessage:(JLSendMessage *)message{
+    NSParameterAssert(_clientId.length);
+    NSParameterAssert(_roomId.length);
+    NSDictionary *dictionary = [message dictionary];
+    [self. socket emit:message.typeString with:@[dictionary]];
+}
+
+#pragma mark - Private
+
+- (void)createRoom{
+    __weak typeof(self)weakSelf = self;
+    [[self.socket emitWithAck:@"videoChat" with:@[@{@"from_user":_clientId, @"to_user":_toId, @"chat_type":@(_mediaType)}]] timingOutAfter:10.f callback:^(NSArray * _Nonnull data) {
+        if ([data.firstObject isKindOfClass:[NSString class]] && [data.firstObject isEqualToString:@"NO ACK"]) {
+            if (weakSelf.roomHandler) {
+                JLChatError *error = [JLChatError errorWithCode:kJLChatErrorCreateRoomFailed];
+                weakSelf.roomHandler(nil, error);
+            }
+        } else {
+            //创建完毕后加入房间
+            [weakSelf joinRoom:data.firstObject handler:weakSelf.roomHandler];
+        }
+    }];
+}
+
+- (void)joinRoom{
+    __weak typeof(self)weakSelf = self;
+    if (self.state == JLSignalingChannelStateConnected) {
+        [[self.socket emitWithAck:@"__join" with:@[@{@"room": _roomId}]] timingOutAfter:10.f callback:^(NSArray * _Nonnull data) {
+            if ([data.firstObject isKindOfClass:[NSString class]] && [data.firstObject isEqualToString:@"NO ACK"]) {
+                if (weakSelf.roomHandler) {
+                    JLChatError *error = [JLChatError errorWithCode:kJLChatErrorJoinRoomFailed];
+                    weakSelf.roomHandler(weakSelf.roomId, error);
+                }
+            } else {
+                if (weakSelf.roomHandler) {
+                    weakSelf.roomHandler(weakSelf.roomId, nil);
+                }
+            }
+        }];
+    }
+}
+
+- (void)addSignalingHandlers{
+    __weak typeof(self)weakSelf = self;
     [self.socket on:@"__peers" callback:^(NSArray * _Nonnull data, SocketAckEmitter * _Nonnull ack) {
-        [weakSelf didReceiveMessage:data.firstObject event:@"peers"];
+        [weakSelf didReceiveSignalingMessage:data.firstObject event:@"peers"];
     }];
     
     [self.socket on:@"_new_peer" callback:^(NSArray * _Nonnull data, SocketAckEmitter * _Nonnull ack) {
-        [weakSelf didReceiveMessage:data.firstObject event:@"newpeer"];
+        [weakSelf didReceiveSignalingMessage:data.firstObject event:@"newpeer"];
     }];
     
     [self.socket on:@"_remove_peer" callback:^(NSArray * _Nonnull data, SocketAckEmitter * _Nonnull ack) {
-        [weakSelf didReceiveMessage:data.firstObject event:@"removepeer"];
+        [weakSelf didReceiveSignalingMessage:data.firstObject event:@"removepeer"];
     }];
     
     [self.socket on:@"_ice_candidate" callback:^(NSArray * _Nonnull data, SocketAckEmitter * _Nonnull ack) {
-        [weakSelf didReceiveMessage:data.firstObject event:@"candidate"];
+        [weakSelf didReceiveSignalingMessage:data.firstObject event:@"candidate"];
     }];
     
     [self.socket on:@"_offer" callback:^(NSArray * _Nonnull data, SocketAckEmitter * _Nonnull ack) {
-        [weakSelf didReceiveMessage:data.firstObject event:@"offer"];
+        [weakSelf didReceiveSignalingMessage:data.firstObject event:@"offer"];
     }];
     
     [self.socket on:@"_answer" callback:^(NSArray * _Nonnull data, SocketAckEmitter * _Nonnull ack) {
-        [weakSelf didReceiveMessage:data.firstObject event:@"answer"];
+        [weakSelf didReceiveSignalingMessage:data.firstObject event:@"answer"];
     }];
 }
 
-- (void)didReceiveMessage:(id)message event:(NSString *)event{
+- (void)didReceiveSignalingMessage:(id)message event:(NSString *)event{
     JLSignalingMessage *signalingMessage = [JLSignalingMessage messageFromJsonString:message typeString:event];
     [self.signalingDelegate channel:self didReceiveMessage:signalingMessage];
 }

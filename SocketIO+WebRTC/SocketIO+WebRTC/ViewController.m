@@ -7,15 +7,10 @@
 //
 
 #import "ViewController.h"
-#import "JLSocketIOManager.h"
-#import "JLRTCManager.h"
+#import "JLChatClient.h"
 #import <WebRTC/RTCCameraPreviewView.h>
-#import <WebRTC/RTCEAGLVideoView.h>
 
-
-@interface ViewController () <JLRTCManagerDelegate>
-
-@property (nonatomic, strong) JLRTCManager *rtcManager;
+@interface ViewController () <JLCallManagerDelegate>
 
 @end
 
@@ -25,17 +20,13 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
-    [[JLSocketIOManager sharedManager] connect];
-    self.rtcManager = [[JLRTCManager alloc] init];
-    self.rtcManager.delegate = self;
-    [self.rtcManager chatWithUserId:@"111" chatType:JLMediaChannelTypeVideo];
+    [[JLChatClient sharedClient] connect];
+    [[JLChatClient sharedClient].callManager chatWithUserId:@"111" chatType:JLMediaChannelTypeVideo handler:^(NSString *roomId, JLChatError *error) {
+        
+    }];
 }
 
-- (void)manager:(JLRTCManager *)manager didRemoveLocalVideoTrack:(RTCVideoTrack *)localVideoTrack{
-    
-}
-
-- (void)manager:(JLRTCManager *)manager didCreateLocalCapturer:(RTCCameraVideoCapturer *)localCapturer{
+- (void)manager:(id<JLCallManager>)manager didCreateLocalCapturer:(RTCCameraVideoCapturer *)localCapturer{
     RTCCameraPreviewView *previewView = [[RTCCameraPreviewView alloc] initWithFrame:self.view.bounds];
     previewView.captureSession = localCapturer.captureSession;
     [self.view addSubview:previewView];

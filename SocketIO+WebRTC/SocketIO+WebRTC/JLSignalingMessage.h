@@ -72,4 +72,6 @@ typedef enum {
 
 @interface JLByeMessage : JLSignalingMessage
 
+- (NSDictionary *)dictionary;
+
 @end

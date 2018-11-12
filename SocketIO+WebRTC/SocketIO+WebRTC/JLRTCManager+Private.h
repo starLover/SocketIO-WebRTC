@@ -14,9 +14,9 @@
 
 @class RTCPeerConnectionFactory;
 
-@interface  JLRTCManager () <JLSignalingChannelDelegate, RTCPeerConnectionDelegate>
+@interface  JLRTCManager () <RTCPeerConnectionDelegate, JLSignalingChannelDelegate>
 
-//@property (nonatomic, strong) id<JLSignalingChannel> channel;
+@property (nonatomic, weak) id<JLSignalingChannel> channel;
 
 @property(nonatomic, strong) RTCPeerConnectionFactory *factory;
 @property(nonatomic, strong) RTCMediaStream *localMediaStream;
@@ -28,7 +28,6 @@
 @property(nonatomic, readonly) BOOL hasJoinedRoomServerRoom;
 
 @property(nonatomic, strong) NSString *clientId;
-@property(nonatomic, assign) BOOL isInitiator;
 @property(nonatomic, strong) NSMutableArray *iceServers;
 
 @property(nonatomic, strong) RTCMediaConstraints *defaultPeerConnectionConstraints;

@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		561752CD21899DEC0052D54D /* JLRTCManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 561752CC21899DEC0052D54D /* JLRTCManager.m */; };
+		561B638D21953C3000ED85F6 /* JLChatClient.m in Sources */ = {isa = PBXBuildFile; fileRef = 561B638C21953C3000ED85F6 /* JLChatClient.m */; };
+		561B639021953D9500ED85F6 /* JLChatMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 561B638F21953D9500ED85F6 /* JLChatMessage.m */; };
+		561B639821958BA400ED85F6 /* JLChatError.m in Sources */ = {isa = PBXBuildFile; fileRef = 561B639721958BA400ED85F6 /* JLChatError.m */; };
 		564A1CFD2182B7FA0055CA20 /* JLSocketIOManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 564A1CFC2182B7FA0055CA20 /* JLSocketIOManager.m */; };
 		564E8FF3218B035600F35BBA /* JLSignalingMessage.m in Sources */ = {isa = PBXBuildFile; fileRef = 564E8FF2218B035600F35BBA /* JLSignalingMessage.m */; };
 		564E8FF6218B089B00F35BBA /* RTCIceCandidate+JSON.m in Sources */ = {isa = PBXBuildFile; fileRef = 564E8FF5218B089B00F35BBA /* RTCIceCandidate+JSON.m */; };
@@ -20,6 +23,8 @@
 		56A9E5682182B6A2009FC27F /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 56A9E5672182B6A2009FC27F /* main.m */; };
 		56A9E5722182B6A2009FC27F /* SocketIO_WebRTCTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 56A9E5712182B6A2009FC27F /* SocketIO_WebRTCTests.m */; };
 		56A9E57D2182B6A2009FC27F /* SocketIO_WebRTCUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 56A9E57C2182B6A2009FC27F /* SocketIO_WebRTCUITests.m */; };
+		56D76FAA2199768C00D338AE /* JLMessageBody.m in Sources */ = {isa = PBXBuildFile; fileRef = 56D76FA92199768C00D338AE /* JLMessageBody.m */; };
+		56D76FB021997F0F00D338AE /* JLTextMessageBody.m in Sources */ = {isa = PBXBuildFile; fileRef = 56D76FAF21997F0F00D338AE /* JLTextMessageBody.m */; };
 		6A729A16162E15A5E5564D2A /* Pods_SocketIO_WebRTC.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = A4A29046E40B5C1D996A898E /* Pods_SocketIO_WebRTC.framework */; };
 /* End PBXBuildFile section */
 
@@ -44,6 +49,12 @@
 		561752CB21899DEC0052D54D /* JLRTCManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLRTCManager.h; sourceTree = "<group>"; };
 		561752CC21899DEC0052D54D /* JLRTCManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JLRTCManager.m; sourceTree = "<group>"; };
 		561752CE21899F800052D54D /* JLRTCHeader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLRTCHeader.h; sourceTree = "<group>"; };
+		561B638B21953C3000ED85F6 /* JLChatClient.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLChatClient.h; sourceTree = "<group>"; };
+		561B638C21953C3000ED85F6 /* JLChatClient.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JLChatClient.m; sourceTree = "<group>"; };
+		561B638E21953D9500ED85F6 /* JLChatMessage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLChatMessage.h; sourceTree = "<group>"; };
+		561B638F21953D9500ED85F6 /* JLChatMessage.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JLChatMessage.m; sourceTree = "<group>"; };
+		561B639621958BA400ED85F6 /* JLChatError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLChatError.h; sourceTree = "<group>"; };
+		561B639721958BA400ED85F6 /* JLChatError.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JLChatError.m; sourceTree = "<group>"; };
 		564A1CFB2182B7FA0055CA20 /* JLSocketIOManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLSocketIOManager.h; sourceTree = "<group>"; };
 		564A1CFC2182B7FA0055CA20 /* JLSocketIOManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JLSocketIOManager.m; sourceTree = "<group>"; };
 		564E8FF1218B035600F35BBA /* JLSignalingMessage.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLSignalingMessage.h; sourceTree = "<group>"; };
@@ -68,6 +79,12 @@
 		56A9E5782182B6A2009FC27F /* SocketIO+WebRTCUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "SocketIO+WebRTCUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		56A9E57C2182B6A2009FC27F /* SocketIO_WebRTCUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SocketIO_WebRTCUITests.m; sourceTree = "<group>"; };
 		56A9E57E2182B6A2009FC27F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		56D76FA6219964B500D338AE /* JLChatManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLChatManager.h; sourceTree = "<group>"; };
+		56D76FA7219969E000D338AE /* JLCallManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLCallManager.h; sourceTree = "<group>"; };
+		56D76FA82199768C00D338AE /* JLMessageBody.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLMessageBody.h; sourceTree = "<group>"; };
+		56D76FA92199768C00D338AE /* JLMessageBody.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JLMessageBody.m; sourceTree = "<group>"; };
+		56D76FAE21997F0F00D338AE /* JLTextMessageBody.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLTextMessageBody.h; sourceTree = "<group>"; };
+		56D76FAF21997F0F00D338AE /* JLTextMessageBody.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = JLTextMessageBody.m; sourceTree = "<group>"; };
 		56EFA2EC218FECF70059C341 /* JLSignalingChannel.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = JLSignalingChannel.h; sourceTree = "<group>"; };
 		56EFA2ED21902F6D0059C341 /* JLRTCManager+Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "JLRTCManager+Private.h"; sourceTree = "<group>"; };
 		A4A29046E40B5C1D996A898E /* Pods_SocketIO_WebRTC.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SocketIO_WebRTC.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -130,18 +147,30 @@
 				56A9E5592182B6A0009FC27F /* AppDelegate.m */,
 				56A9E55B2182B6A0009FC27F /* ViewController.h */,
 				56A9E55C2182B6A0009FC27F /* ViewController.m */,
+				561B638B21953C3000ED85F6 /* JLChatClient.h */,
+				561B638C21953C3000ED85F6 /* JLChatClient.m */,
 				564A1CFB2182B7FA0055CA20 /* JLSocketIOManager.h */,
 				564A1CFC2182B7FA0055CA20 /* JLSocketIOManager.m */,
 				56EFA2EC218FECF70059C341 /* JLSignalingChannel.h */,
 				561752CB21899DEC0052D54D /* JLRTCManager.h */,
 				561752CC21899DEC0052D54D /* JLRTCManager.m */,
 				56EFA2ED21902F6D0059C341 /* JLRTCManager+Private.h */,
+				56D76FA7219969E000D338AE /* JLCallManager.h */,
+				56D76FA6219964B500D338AE /* JLChatManager.h */,
 				564E8FF1218B035600F35BBA /* JLSignalingMessage.h */,
 				564E8FF2218B035600F35BBA /* JLSignalingMessage.m */,
+				561B638E21953D9500ED85F6 /* JLChatMessage.h */,
+				561B638F21953D9500ED85F6 /* JLChatMessage.m */,
+				56D76FA82199768C00D338AE /* JLMessageBody.h */,
+				56D76FA92199768C00D338AE /* JLMessageBody.m */,
+				56D76FAE21997F0F00D338AE /* JLTextMessageBody.h */,
+				56D76FAF21997F0F00D338AE /* JLTextMessageBody.m */,
 				564E8FF4218B089B00F35BBA /* RTCIceCandidate+JSON.h */,
 				564E8FF5218B089B00F35BBA /* RTCIceCandidate+JSON.m */,
 				564E8FF7218B0AA800F35BBA /* RTCSessionDescription+JSON.h */,
 				564E8FF8218B0AA800F35BBA /* RTCSessionDescription+JSON.m */,
+				561B639621958BA400ED85F6 /* JLChatError.h */,
+				561B639721958BA400ED85F6 /* JLChatError.m */,
 				561752CE21899F800052D54D /* JLRTCHeader.h */,
 				56A9E55E2182B6A0009FC27F /* Main.storyboard */,
 				56A9E5612182B6A2009FC27F /* Assets.xcassets */,
@@ -363,11 +392,16 @@
 			buildActionMask = 2147483647;
 			files = (
 				564E8FF3218B035600F35BBA /* JLSignalingMessage.m in Sources */,
+				561B638D21953C3000ED85F6 /* JLChatClient.m in Sources */,
 				564E8FF6218B089B00F35BBA /* RTCIceCandidate+JSON.m in Sources */,
+				561B639021953D9500ED85F6 /* JLChatMessage.m in Sources */,
+				56D76FB021997F0F00D338AE /* JLTextMessageBody.m in Sources */,
 				564A1CFD2182B7FA0055CA20 /* JLSocketIOManager.m in Sources */,
 				561752CD21899DEC0052D54D /* JLRTCManager.m in Sources */,
+				561B639821958BA400ED85F6 /* JLChatError.m in Sources */,
 				56A9E55D2182B6A0009FC27F /* ViewController.m in Sources */,
 				564E8FF9218B0AA800F35BBA /* RTCSessionDescription+JSON.m in Sources */,
+				56D76FAA2199768C00D338AE /* JLMessageBody.m in Sources */,
 				56A9E5682182B6A2009FC27F /* main.m in Sources */,
 				56A9E55A2182B6A0009FC27F /* AppDelegate.m in Sources */,
 			);

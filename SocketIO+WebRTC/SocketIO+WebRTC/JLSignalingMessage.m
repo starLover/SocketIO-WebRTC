@@ -220,11 +220,11 @@ static NSString const *kSocketIdKey = @"socketId";
     return [super initWithType:kJLSignalingMessageTypeBye];
 }
 
-- (NSData *)JSONData{
+- (NSDictionary *)dictionary{
     NSDictionary *message = @{
                               @"type": @"bye"
                               };
-    return [NSJSONSerialization dataWithJSONObject:message options:NSJSONWritingPrettyPrinted error:NULL];
+    return message;
 }
 
 @end

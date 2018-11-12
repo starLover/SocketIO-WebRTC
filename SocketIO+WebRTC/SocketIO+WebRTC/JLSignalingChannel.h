@@ -7,6 +7,7 @@
 //
 
 #import <Foundation/Foundation.h>
+#import "JLChatError.h"
 
 #import "JLSignalingMessage.h"
 
@@ -19,12 +20,6 @@ typedef NS_ENUM (NSInteger, JLSignalingChannelState) {
     JLSignalingChannelStateConnecting,
     /// The client is currently connected.
     JLSignalingChannelStateConnected,
-    ///
-    JLSignalingChannelStateJoiningRoom,
-    ///
-    JLSignalingChannelStateJoinedRoom,
-    ///
-    JLSignalingChannelStateJoinedRoomError,
 };
 
 typedef NS_ENUM (NSInteger, JLMediaChannelType) {
@@ -32,6 +27,12 @@ typedef NS_ENUM (NSInteger, JLMediaChannelType) {
     JLMediaChannelTypeVideo,
     JLMediaChannelTypeAudio,
 };
+
+//typedef NS_ENUM(NSInteger, JLRoomState) {
+//
+//};
+
+typedef void(^JLRoomHanlder)(NSString *roomId, JLChatError *error);
 
 @protocol JLSignalingChannel;
 @protocol JLSignalingChannelDelegate <NSObject>
@@ -57,6 +58,7 @@ typedef NS_ENUM (NSInteger, JLMediaChannelType) {
 @property (nonatomic, readonly) NSString *roomId;
 @property (nonatomic, readonly) NSString *clientId;
 @property (nonatomic, readonly) NSString *toId;
+@property (nonatomic, readonly) JLMediaChannelType mediaType;
 @property (nonatomic, readonly) JLSignalingChannelState state;
 @property (nonatomic, weak) id<JLSignalingChannelDelegate> signalingDelegate;
 @property (nonatomic, weak) id<JLMediaChannelDelegate> mediaChannelDelegate;
@@ -64,11 +66,13 @@ typedef NS_ENUM (NSInteger, JLMediaChannelType) {
 // 创建和加入房间结果将通过
 // - (void)channel:(id<JLSignalingChannel>)channel didChangeState:(JLSignalingChannelState)state
 // 代理方法回传
-- (void)createAndJoinRoomWithToId:(NSString *)toId;
+- (void)createAndJoinRoomWithToId:(NSString *)toId mediaType:(JLMediaChannelType)type handler:(JLRoomHanlder)handler;
 
-- (void)joinRoom:(NSString *)roomId;
+- (void)joinRoom:(NSString *)roomId handler:(JLRoomHanlder)handler;
+
+- (void)leaveRoom:(NSString *)roomId;
 
 // Sends signaling message over the channel.
-- (void)sendMessage:(JLSignalingMessage *)message;
+- (void)sendSignalingMessage:(JLSignalingMessage *)message;
 
 @end
